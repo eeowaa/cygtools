@@ -1,0 +1,4 @@
+To install these tools, either:
+
+1. Add the absolute path of ./bin to your $PATH
+2. Move the contents of ./bin to an existing location in your $PATH
