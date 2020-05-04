@@ -1,0 +1,35 @@
+#!/bin/sh
+
+## List valid Cygwin package categories to be passed to `apt-cyg category'
+categories()
+{
+    # Find the system directory containing package description files
+    cachedir=`awk '$0 == "last-cache" { getline; print $1; exit }' /etc/setup/setup.rc`
+    cachedir=`cygpath "$cachedir"`
+
+    # Print unique list of categories from package descriptions
+    find "$cachedir" -maxdepth 3 -type f -name setup.ini \
+        | xargs sed -n 's/^category: //p' | tr ' ' \\n \
+        | sort -u
+}
+
+case $1 in
+help)
+    cat <<EOF
+Usage: pkg COMMAND
+\`pkg' is a complement to \`apt-cyg'
+
+COMMANDS:
+  help          Display this help and exit
+  whatis        Show the short description (\`sdesc') field of a package
+  categories    List valid categories to be passed to \`apt-cyg category'
+EOF
+    exit $? ;;
+whatis)
+    shift
+    for pkg
+    do apt-cyg show $pkg | sed -n 's/^sdesc: "\(.*\)"$/'"$pkg : "'\1/p'
+    done ;;
+categories)
+    categories ;;
+esac

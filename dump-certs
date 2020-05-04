@@ -1,0 +1,23 @@
+#!/bin/sh
+## Dump certificates contained in Microsoft Windows system stores
+
+# Current user SID obtained from native "whoami"
+usersid=`C:/WINDOWS/system32/whoami /user /fo table /nh | sed -e 's/.* \(S-1-5-21-\)/\1/' -e 's/\r$//'`
+
+# Names and paths obtained from <https://docs.microsoft.com/en-us/windows/win32/seccrypto/system-store-locations>
+CERT_SYSTEM_STORE_CURRENT_USER='HKEY_CURRENT_USER/SOFTWARE/Microsoft/SystemCertificates'
+CERT_SYSTEM_STORE_LOCAL_MACHINE='HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/SystemCertificates'
+CERT_SYSTEM_STORE_CURRENT_SERVICE='HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Cryptography/Services/*/SystemCertificates'
+CERT_SYSTEM_STORE_SERVICES='HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Cryptography/Services/*/SystemCertificates' # same as previous
+CERT_SYSTEM_STORE_USERS="HKEY_USERS/$usersid/SOFTWARE/Microsoft/SystemCertificates"
+CERT_SYSTEM_CURRENT_USER_GROUP_POLICY='HKEY_CURRENT_USER/Software/Policies/Microsoft/SystemCertificates'
+CERT_SYSTEM_LOCAL_MACHINE_GROUP_POLICY='HKEY_LOCAL_MACHINE/Software/Policies/Microsoft/SystemCertificates'
+CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE='' # ???
+
+regtool get /$CERT_SYSTEM_STORE_CURRENT_USER/CA/Certificates/30EE8B72D745DA0F6938ED137AC604DCD8A74AF0/Blob |
+openssl x509 -inform DER -text -noout
+
+exit
+
+cd /proc/registry
+find $CERT_SYSTEM_STORE_CURRENT_USER -name Blob

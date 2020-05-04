@@ -1,0 +1,4 @@
+#!/bin/sh
+## Create symlinks from Cygwin data files containing magic strings
+find . -type f -exec sed -n '1{/^!<symlink>\o377\o376/{s///;s/\o000//g;s|$| {}\n|p};}' '{}' \; \
+| while read src dest; do rm "$dest"; echo ln -s "$src" "$dest"; ln -s "$src" "$dest"; done
