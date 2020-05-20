@@ -1,0 +1,20 @@
+#!/bin/sh
+## Remove executable bits from practically non-executable files
+target=${1-'.'}
+test -d "$target" || {
+    cat >&2 <<EOF
+`basename "$0"`: $target: not a directory
+EOF
+    exit 1
+}
+find "$target" -type f -executable -print | while read f; do
+    ftype=`file "$f"`
+    case $ftype in
+    *executable*)
+        expr "$ftype" : '.*\.[^ /]\{1,\}: ' >/dev/null || continue
+        echo "Keeping executable: $f" >&2 ;; # Issue a warning for scripts
+    *)  set -x
+        chmod -x "$f"
+        { set +x; } 2>/dev/null ;;
+    esac
+done
